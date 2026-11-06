@@ -1,0 +1,288 @@
+{
+  "apiVersion": "v1",
+  "kind": "List",
+  "items": [
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "backend-nov6-pictures"
+      },
+      "spec": {
+        "replicas": 1,
+        "selector": {
+          "matchLabels": {
+            "app": "backend-nov6-pictures"
+          }
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "backend-nov6-pictures"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "pictures",
+                "image": "us.icr.io/sn-labs-yergayes/backend-nov6-pictures:1",
+                "ports": [
+                  {
+                    "containerPort": 3000
+                  }
+                ],
+                "resources": {
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "96Mi"
+                  },
+                  "limits": {
+                    "cpu": "500m",
+                    "memory": "256Mi"
+                  }
+                },
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/health",
+                    "port": 3000
+                  },
+                  "initialDelaySeconds": 10,
+                  "periodSeconds": 10
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "backend-nov6-pictures"
+      },
+      "spec": {
+        "selector": {
+          "app": "backend-nov6-pictures"
+        },
+        "ports": [
+          {
+            "port": 3000,
+            "targetPort": 3000
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "backend-nov6-songs"
+      },
+      "spec": {
+        "replicas": 1,
+        "selector": {
+          "matchLabels": {
+            "app": "backend-nov6-songs"
+          }
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "backend-nov6-songs"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "songs",
+                "image": "us.icr.io/sn-labs-yergayes/backend-nov6-songs:1",
+                "ports": [
+                  {
+                    "containerPort": 8080
+                  }
+                ],
+                "resources": {
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "96Mi"
+                  },
+                  "limits": {
+                    "cpu": "500m",
+                    "memory": "256Mi"
+                  }
+                },
+                "envFrom": [
+                  {
+                    "secretRef": {
+                      "name": "backend-nov6-mongo"
+                    }
+                  }
+                ],
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/health",
+                    "port": 8080
+                  },
+                  "initialDelaySeconds": 10,
+                  "periodSeconds": 10
+                },
+                "env": [
+                  {
+                    "name": "MONGODB_SERVICE",
+                    "value": "localhost:27017"
+                  }
+                ]
+              },
+              {
+                "name": "mongodb",
+                "image": "mongo:4.4",
+                "ports": [
+                  {
+                    "containerPort": 27017
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "MONGO_INITDB_ROOT_USERNAME",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "backend-nov6-mongo",
+                        "key": "MONGODB_USERNAME"
+                      }
+                    }
+                  },
+                  {
+                    "name": "MONGO_INITDB_ROOT_PASSWORD",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "backend-nov6-mongo",
+                        "key": "MONGODB_PASSWORD"
+                      }
+                    }
+                  }
+                ],
+                "resources": {
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "128Mi"
+                  },
+                  "limits": {
+                    "cpu": "500m",
+                    "memory": "384Mi"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "backend-nov6-songs"
+      },
+      "spec": {
+        "selector": {
+          "app": "backend-nov6-songs"
+        },
+        "ports": [
+          {
+            "port": 8080,
+            "targetPort": 8080
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "backend-nov6-django"
+      },
+      "spec": {
+        "replicas": 1,
+        "selector": {
+          "matchLabels": {
+            "app": "backend-nov6-django"
+          }
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "backend-nov6-django"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "django",
+                "image": "us.icr.io/sn-labs-yergayes/backend-nov6-django:1",
+                "ports": [
+                  {
+                    "containerPort": 8000
+                  }
+                ],
+                "resources": {
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "96Mi"
+                  },
+                  "limits": {
+                    "cpu": "500m",
+                    "memory": "256Mi"
+                  }
+                },
+                "envFrom": [
+                  {
+                    "secretRef": {
+                      "name": "backend-nov6-django"
+                    }
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "PICTURES_SERVICE",
+                    "value": "http://backend-nov6-pictures:3000"
+                  },
+                  {
+                    "name": "SONGS_SERVICE",
+                    "value": "http://backend-nov6-songs:8080"
+                  },
+                  {
+                    "name": "DJANGO_DEBUG",
+                    "value": "0"
+                  },
+                  {
+                    "name": "DJANGO_ALLOWED_HOSTS",
+                    "value": "localhost,127.0.0.1,.cognitiveclass.ai,.codeengine.appdomain.cloud,backend-nov6-django"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "backend-nov6-django"
+      },
+      "spec": {
+        "selector": {
+          "app": "backend-nov6-django"
+        },
+        "ports": [
+          {
+            "port": 8000,
+            "targetPort": 8000
+          }
+        ]
+      }
+    }
+  ]
+}
