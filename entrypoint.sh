@@ -1,13 +1,7 @@
 #!/bin/sh
-
-# Make migrations and migrate the database.
-echo "Making migrations and migrating the database. "
-python manage.py makemigrations --noinput
+set -eu
 python manage.py migrate --noinput
-
-DJANGO_SUPERUSER_USERNAME=admin \
-DJANGO_SUPERUSER_PASSWORD=admin \
-DJANGO_SUPERUSER_EMAIL="admin@admin.com" \
-python manage.py createsuperuser --noinput
-
+if [ -n "${DJANGO_SUPERUSER_USERNAME:-}" ] && [ -n "${DJANGO_SUPERUSER_PASSWORD:-}" ]; then
+    python manage.py shell -c 'import os; from django.contrib.auth import get_user_model; User=get_user_model(); name=os.environ["DJANGO_SUPERUSER_USERNAME"]; User.objects.filter(username=name).exists() or User.objects.create_superuser(name,os.environ.get("DJANGO_SUPERUSER_EMAIL",""),os.environ["DJANGO_SUPERUSER_PASSWORD"])'
+fi
 exec "$@"
