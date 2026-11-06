@@ -96,7 +96,7 @@
             "containers": [
               {
                 "name": "songs",
-                "image": "us.icr.io/sn-labs-yergayes/backend-nov6-songs:1",
+                "image": "us.icr.io/sn-labs-yergayes/backend-nov6-songs:2",
                 "ports": [
                   {
                     "containerPort": 8080
