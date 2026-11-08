@@ -44,6 +44,8 @@ def service_page(request, template, key, url):
         response = req.get(url, timeout=10)
         response.raise_for_status()
         data = response.json()
+        if key == "songs" and isinstance(data, dict):
+            data = data.get("songs")
         if not isinstance(data, list):
             raise ValueError("Expected a resource list")
         return render(request, template, {key: data})

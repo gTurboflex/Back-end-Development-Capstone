@@ -47,6 +47,8 @@ class BandWebsiteTests(TestCase):
 
     @patch("concert.views.req.get")
     def test_services_render_real_response_data(self, get):
+        get.return_value = Mock(json=lambda: {"songs": [{"id": 1, "title": "A wrapped song", "lyrics": "A verse"}]})
+        self.assertContains(self.client.get(reverse("songs")), "A wrapped song")
         get.return_value = Mock(json=lambda: [{"id": 1, "title": "A live song", "lyrics": "A verse"}])
         self.assertContains(self.client.get(reverse("songs")), "A live song")
         get.return_value = Mock(json=lambda: [{"id": 1, "pic_url": "https://example.test/picture.png", "event_city": "Almaty"}])

@@ -28,7 +28,25 @@ The initial migration has been generated and applied successfully. Seven tests p
 including registration, duplicate usernames, login/logout, attendance isolation,
 missing concerts, service response rendering, and service outages.
 
-## Container
+## Create an administrator and use the application
+After installing requirements and running migrations, run:
+```sh
+python manage.py createsuperuser
+python manage.py runserver 0.0.0.0:8000
+```
+Choose a username and password interactively; do not commit credentials. Open
+`http://localhost:8000/admin/` and sign in with the administrator account to add
+concert records. The same `/admin/` path is available on the deployed application.
+For a container, run `python manage.py createsuperuser` inside the running Django
+container, or provide the documented superuser environment variables at startup.
+
+Open `/` for the band home page, `/songs` for the song list and Lyrics dialogs,
+and `/photos` for photos. Register a listener through Sign Up, log in, open
+Concerts, and select a concert to record attendance. Log Out ends the session.
+The Songs service returns an object containing a `songs` list; the Django adapter
+also accepts the earlier bare-list response during a staged service upgrade.
+
+## Container deployment
 ```sh
 docker build -t djangoserver:1 .
 docker run --rm -p 8000:8000 --env PICTURES_SERVICE --env SONGS_SERVICE --env DJANGO_SECRET_KEY djangoserver:1
